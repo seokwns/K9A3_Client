@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="libraries">
+      <UniqueIdentifier>{7cd2b3eb-4de4-414b-9e20-f6781927d396}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\constants">
+      <UniqueIdentifier>{458be7ac-94da-4e20-8240-3c912c683f91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\device">
+      <UniqueIdentifier>{c2b27b92-05c0-45c7-a8d0-2ad7b61bed0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\tcc">
+      <UniqueIdentifier>{3399e6f5-fc06-4d62-9127-15d381966798}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\threads">
+      <UniqueIdentifier>{356df3ec-44f0-44c8-8bac-1fa45ab156e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="devices">
+      <UniqueIdentifier>{9e535ab5-bec6-4643-adee-bab3c1bd5876}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="devices\attla">
+      <UniqueIdentifier>{efd94cf5-75bf-4faa-b18d-1e2e3b72a24b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libraries\singleton.h">
+      <Filter>libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\messages.h">
+      <Filter>libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\serializer.h">
+      <Filter>libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\InputHelper.h">
+      <Filter>libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\constants\constants.h">
+      <Filter>libraries\constants</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\constants\DeviceConstants.h">
+      <Filter>libraries\constants</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\device\BitData.h">
+      <Filter>libraries\device</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\device\DeviceDriver.h">
+      <Filter>libraries\device</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\device\DeviceRawData.h">
+      <Filter>libraries\device</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\device\DeviceState.h">
+      <Filter>libraries\device</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\threads\ThreadPool.h">
+      <Filter>libraries\threads</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\tcc\TccState.h">
+      <Filter>libraries\tcc</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\tcc\TurretControl.h">
+      <Filter>libraries\tcc</Filter>
+    </ClInclude>
+    <ClInclude Include="devices\attla\AttlaDriver.h">
+      <Filter>devices\attla</Filter>
+    </ClInclude>
+    <ClInclude Include="devices\attla\AttlaState.h">
+      <Filter>devices\attla</Filter>
+    </ClInclude>
+    <ClInclude Include="devices\attla\AttlaRawData.h">
+      <Filter>devices\attla</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\Logger.h" />
+    <ClInclude Include="libraries\Timer.h" />
+    <ClInclude Include="libraries\cli\CommandLine.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="libraries\device\DeviceDriver.cpp">
+      <Filter>libraries\device</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\threads\ThreadPool.cpp">
+      <Filter>libraries\threads</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\tcc\TurretControl.cpp">
+      <Filter>libraries\tcc</Filter>
+    </ClCompile>
+    <ClCompile Include="devices\attla\AttlaDriver.cpp">
+      <Filter>devices\attla</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="libraries\Logger.cpp" />
+    <ClCompile Include="libraries\cli\CommandLine.cpp" />
+  </ItemGroup>
+</Project>
