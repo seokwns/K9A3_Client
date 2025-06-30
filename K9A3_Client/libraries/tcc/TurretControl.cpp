@@ -84,12 +84,12 @@ void TurretControl::setPauseCtrlState(uint8_t _deviceId, uint16_t result)
 /**
  * ============================ 데이터 파싱 ============================
  */
-DeviceClient TurretControl::createClient(const sockaddr_in &client_addr)
+DeviceClient TurretControl::createClient(const sockaddr_in& client_addr)
 {
-    return {inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port)};
+    return { inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port) };
 }
 
-std::optional<ProtocolDataUnit> TurretControl::parsePayload(const uint8_t *buffer, size_t recv_len)
+std::optional<ProtocolDataUnit> TurretControl::parsePayload(const uint8_t* buffer, size_t recv_len)
 {
     MessageHeader header;
     std::memcpy(&header, buffer, sizeof(header));
@@ -98,7 +98,7 @@ std::optional<ProtocolDataUnit> TurretControl::parsePayload(const uint8_t *buffe
     {
         header.print();
         std::cerr << std::endl
-                  << "[Server Thread] ProtocolDataUnit data length exceeds maximum allowed size. (header: " << static_cast<int>(header.dataLength) << ", actual: " << recv_len - 12 << ")" << std::endl;
+            << "[Server Thread] ProtocolDataUnit data length exceeds maximum allowed size. (header: " << static_cast<int>(header.dataLength) << ", actual: " << recv_len - 12 << ")" << std::endl;
         return {};
     }
 
@@ -109,9 +109,9 @@ std::optional<ProtocolDataUnit> TurretControl::parsePayload(const uint8_t *buffe
     return pdu;
 }
 
-uint8_t *TurretControl::serializePDU(const ProtocolDataUnit &pdu, size_t total_size)
+uint8_t* TurretControl::serializePDU(const ProtocolDataUnit& pdu, size_t total_size)
 {
-    uint8_t *serialized_pdu = new uint8_t[total_size];
+    uint8_t* serialized_pdu = new uint8_t[total_size];
     std::memcpy(serialized_pdu, &pdu.header, HEADER_SIZE);
 
     if ((pdu.data != nullptr) && (pdu.header.dataLength > 0))
@@ -128,8 +128,8 @@ uint8_t *TurretControl::serializePDU(const ProtocolDataUnit &pdu, size_t total_s
  */
 void TurretControl::EthernetWorker()
 {
-    pool = std::make_unique<ThreadPool>(server::THREAD_POOL_SIZE, [&](const Message &msg)
-                                        { handlePacketData(msg); });
+    pool = std::make_unique<ThreadPool>(server::THREAD_POOL_SIZE, [&](const Message& msg)
+        { handlePacketData(msg); });
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
@@ -143,7 +143,7 @@ void TurretControl::EthernetWorker()
     server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(9003);
 
-    if (bind(sock, reinterpret_cast<sockaddr *>(&server_addr), sizeof(server_addr)) < 0)
+    if (bind(sock, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr)) < 0)
     {
         std::cerr << "[Server Thread] Error: Socket bind failed." << std::endl;
         close(sock);
@@ -166,12 +166,12 @@ void TurretControl::EthernetWorker()
 
         if (FD_ISSET(sock, &read_fds))
         {
-            unsigned char buffer[server::BUFFER_SIZE] = {0};
+            unsigned char buffer[server::BUFFER_SIZE] = { 0 };
             sockaddr_in client_addr = {};
             socklen_t client_len = sizeof(client_addr);
 
             ssize_t recv_len = recvfrom(sock, buffer, server::BUFFER_SIZE - 1, 0,
-                                        reinterpret_cast<sockaddr *>(&client_addr), &client_len);
+                reinterpret_cast<sockaddr*>(&client_addr), &client_len);
 
             if (recv_len > 0)
             {
@@ -185,7 +185,7 @@ void TurretControl::EthernetWorker()
 
                 // std::cout << client.ip << ":" << client.port << std::endl;
 
-                Message msg{client, *pdu};
+                Message msg{ client, *pdu };
                 pool->enqueue(msg);
             }
         }
@@ -197,7 +197,7 @@ void TurretControl::EthernetWorker()
 /**
  * ============================ UDP 데이터 처리 ============================
  */
-void TurretControl::handlePacketData(const Message &msg)
+void TurretControl::handlePacketData(const Message& msg)
 {
     auto _device = getDevice(msg.pdu.header.destId);
 
@@ -231,6 +231,11 @@ void TurretControl::handlePacketData(const Message &msg)
     // 페이로드 데이터일 경우
     if (msg.pdu.header.isPayload() == true)
     {
+        if (msg.pdu.header.code != MessageCode::STATE_INFO)
+        {
+            msg.pdu.print();
+        }
+
         // ACK를 필요로 하는 메시지의 경우 ACK 전송 후 데이터 처리
         if (msg.pdu.header.ack == AckCode::REQUEST_ACK)
         {
@@ -248,7 +253,7 @@ void TurretControl::handlePacketData(const Message &msg)
 /**
  * ============================ UDP 데이터 전송 ============================
  */
-void TurretControl::sendPacket(const DeviceClient &client, ProtocolDataUnit &pdu)
+void TurretControl::sendPacket(const DeviceClient& client, ProtocolDataUnit& pdu)
 {
     // pdu.header.setTimestamp();
     pdu.header.timestamp = 0;
@@ -283,10 +288,10 @@ void TurretControl::sendPacket(const DeviceClient &client, ProtocolDataUnit &pdu
     client_addr.sin_port = htons(tccClient.port);
 
     size_t total_size = HEADER_SIZE + pdu.header.dataLength + CHECKSUM_SIZE;
-    uint8_t *serialized_pdu = serializePDU(pdu, total_size);
+    uint8_t* serialized_pdu = serializePDU(pdu, total_size);
 
     ssize_t sent_len = sendto(sock, serialized_pdu, total_size, 0,
-                              reinterpret_cast<sockaddr *>(&client_addr), sizeof(client_addr));
+        reinterpret_cast<sockaddr*>(&client_addr), sizeof(client_addr));
 
     if (sent_len < 0)
     {
@@ -306,14 +311,14 @@ void TurretControl::sendPacket(const DeviceClient &client, ProtocolDataUnit &pdu
  * ============================ ACK 데이터 처리 ============================
  */
 
-/**
- * @brief 현재 시간(Unix epoch) 기준 milliseconds 단위 4byte timestamp 반환
- */
+ /**
+  * @brief 현재 시간(Unix epoch) 기준 milliseconds 단위 4byte timestamp 반환
+  */
 uint32_t TurretControl::getCurrentTimestamp()
 {
     auto millisec_since_epoch = duration_cast<milliseconds>(
-                                    system_clock::now().time_since_epoch())
-                                    .count();
+        system_clock::now().time_since_epoch())
+        .count();
 
     return static_cast<uint32_t>(millisec_since_epoch);
 }
@@ -352,10 +357,10 @@ void TurretControl::AckWorker()
                 devicePtr->sendMessage(_pdu);
 
                 std::cout << std::endl
-                          << "[ACK Thread] ACK not received. Retrying "
-                          << "0x" << std::uppercase << std::hex << static_cast<int>(itr->header.sourceId)
-                          << static_cast<int>(itr->header.destId) << static_cast<int>(itr->header.code) << std::setw(2) << std::setfill('0') << static_cast<int>(itr->header.ack)
-                          << std::dec << " (" << static_cast<int>(itr->header.sendCount) << ")" << std::endl;
+                    << "[ACK Thread] ACK not received. Retrying "
+                    << "0x" << std::uppercase << std::hex << static_cast<int>(itr->header.sourceId)
+                    << static_cast<int>(itr->header.destId) << static_cast<int>(itr->header.code) << std::setw(2) << std::setfill('0') << static_cast<int>(itr->header.ack)
+                    << std::dec << " (" << static_cast<int>(itr->header.sendCount) << ")" << std::endl;
             }
 
             ++itr;
@@ -365,7 +370,7 @@ void TurretControl::AckWorker()
     }
 }
 
-void TurretControl::sendAckMessage(const DeviceClient &client, uint8_t destId, uint8_t code, uint8_t ack_result, uint8_t ack_info)
+void TurretControl::sendAckMessage(const DeviceClient& client, uint8_t destId, uint8_t code, uint8_t ack_result, uint8_t ack_info)
 {
     MessageHeader ack_header{};
     ack_header.priority = 0x02;
@@ -383,13 +388,13 @@ void TurretControl::sendAckMessage(const DeviceClient &client, uint8_t destId, u
     sendPacket(client, ack_payload);
 }
 
-void TurretControl::handleAckData(const Message &msg)
+void TurretControl::handleAckData(const Message& msg)
 {
     auto itr = std::find_if(msgList.begin(), msgList.end(),
-                            [this, msg](const ProtocolDataUnit &pdu)
-                            {
-                                return pdu.header.sourceId == msg.pdu.header.sourceId && pdu.header.destId == deviceId && pdu.header.code == msg.pdu.header.code && pdu.header.ack == msg.pdu.header.ack && pdu.header.timestamp == msg.pdu.header.timestamp;
-                            });
+        [this, msg](const ProtocolDataUnit& pdu)
+        {
+            return pdu.header.sourceId == msg.pdu.header.sourceId && pdu.header.destId == deviceId && pdu.header.code == msg.pdu.header.code && pdu.header.ack == msg.pdu.header.ack && pdu.header.timestamp == msg.pdu.header.timestamp;
+        });
 
     if (itr == msgList.end())
     {
