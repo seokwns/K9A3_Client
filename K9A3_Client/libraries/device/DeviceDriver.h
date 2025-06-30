@@ -17,7 +17,7 @@
 #include "../Timer.h"
 #include "../Logger.h"
 
-using MessageHandler = std::function<void(const Message &)>;
+using MessageHandler = std::function<void(const Message&)>;
 
 class DeviceDriver
 {
@@ -31,11 +31,13 @@ protected:
     BitData cbit;
     BitData ibit;
 
+    bool connected = false;
+
     std::unordered_map<uint8_t, MessageHandler> messageHandlerMapper;
 
 public:
     // 생성자
-    DeviceDriver(DeviceRecord record) : deviceId(record.deviceId), client({record.ip, record.port})
+    DeviceDriver(DeviceRecord record) : deviceId(record.deviceId), client({ record.ip, record.port })
     {
         addMessageHandler(MessageCode::SHUTDOWN_READY, &DeviceDriver::SHUTDOWN_READY_REQ);
         addMessageHandler(MessageCode::PBIT_RESULT, &DeviceDriver::PBIT_RESULT_REQ);
@@ -67,7 +69,7 @@ public:
      * @return true  처리 성공
      * @return false 핸들러 없음
      */
-    bool handleMessage(const Message &msg)
+    bool handleMessage(const Message& msg)
     {
         auto it = messageHandlerMapper.find(msg.pdu.header.code);
         if (it != messageHandlerMapper.end())
@@ -87,7 +89,11 @@ public:
 
     uint8_t getDeviceId() const;
 
-    virtual DeviceState *getDeviceState() const {}
+    bool isConnected() const { return connected; }
+
+    virtual DeviceState* getDeviceState() const {}
+
+    uint16_t getCBitPeriod() const { return cbitPeriod; }
 
     int getPBitData(size_t byteIndex, size_t bitIndex);
 
@@ -95,39 +101,39 @@ public:
 
     int getIBitData(size_t byteIndex, size_t bitIndex);
 
-    ProtocolDataUnit createPayload(uint8_t code, uint8_t ack, uint8_t priority, uint8_t sendCount, uint8_t dataLength, const void *data);
+    ProtocolDataUnit createPayload(uint8_t code, uint8_t ack, uint8_t priority, uint8_t sendCount, uint8_t dataLength, const void* data);
     ProtocolDataUnit createPayload(uint8_t code, uint8_t ack, uint8_t priority, uint8_t sendCount);
 
-    ProtocolDataUnit sendMessage(uint8_t code, uint8_t ack, uint8_t priority, uint8_t sendCount, uint8_t dataLength, const void *data);
-    ProtocolDataUnit sendMessage(uint8_t code, uint8_t ack, uint8_t dataLength, const void *data);
+    ProtocolDataUnit sendMessage(uint8_t code, uint8_t ack, uint8_t priority, uint8_t sendCount, uint8_t dataLength, const void* data);
+    ProtocolDataUnit sendMessage(uint8_t code, uint8_t ack, uint8_t dataLength, const void* data);
     ProtocolDataUnit sendMessage(uint8_t code, uint8_t ack, uint8_t priority, uint8_t sendCount);
     ProtocolDataUnit sendMessage(uint8_t code, uint8_t ack);
     void sendMessage(ProtocolDataUnit pdu);
 
     void BOOTDONE_UPD();
 
-    void SHUTDOWN_READY_REQ(const Message &msg);
+    void SHUTDOWN_READY_REQ(const Message& msg);
     void SHUTDOWN_READY_DONE_UPD(uint16_t result);
 
-    void PBIT_RESULT_REQ(const Message &msg);
+    void PBIT_RESULT_REQ(const Message& msg);
     void PBIT_RESULT_REF();
 
-    void CBIT_SET_UPD(const Message &msg);
-    void CBIT_RESULT_REQ(const Message &msg);
+    void CBIT_SET_UPD(const Message& msg);
+    void CBIT_RESULT_REQ(const Message& msg);
     void CBIT_RESULT_REF();
 
-    void IBIT_RUN_CMD(const Message &msg);
+    void IBIT_RUN_CMD(const Message& msg);
     void IBIT_DONE_UPD();
-    void IBIT_RESULT_REQ(const Message &msg);
+    void IBIT_RESULT_REQ(const Message& msg);
     void IBIT_RESULT_REF();
 
-    void EMERGENCY_CTRL_CMD(const Message &msg);
+    void EMERGENCY_CTRL_CMD(const Message& msg);
     void EMERGENCY_CTRL_REF();
 
-    void PAUSE_CTRL_CMD(const Message &msg);
+    void PAUSE_CTRL_CMD(const Message& msg);
     void PAUSE_CTRL_REF();
 
-    void STATE_INFO_REQ(const Message &msg);
+    void STATE_INFO_REQ(const Message& msg);
     virtual void state_info_ref() {};
 
 protected:
@@ -140,11 +146,11 @@ protected:
      * @param T this 타입 (device 또는 파생 클래스)
      */
     template <typename T>
-    void addMessageHandler(uint8_t code, void (T::*method)(const Message &))
+    void addMessageHandler(uint8_t code, void (T::* method)(const Message&))
     {
-        messageHandlerMapper[code] = [this, method](const Message &msg)
-        {
-            (static_cast<T *>(this)->*method)(msg);
-        };
+        messageHandlerMapper[code] = [this, method](const Message& msg)
+            {
+                (static_cast<T*>(this)->*method)(msg);
+            };
     }
 };

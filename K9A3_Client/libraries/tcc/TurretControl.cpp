@@ -15,6 +15,12 @@ TurretControl::TurretControl() : deviceId(DeviceTable::TCC.deviceId), port(Devic
         serverThread = std::make_unique<std::thread>(&TurretControl::EthernetWorker, this);
         std::cout << "[TCC] Client start (Thread ID: " << serverThread->get_id() << ")" << std::endl;
     }
+
+    if (!cbitThread)
+    {
+        cbitThread = std::make_unique<std::thread>(&TurretControl::cbitWorker, this);
+        std::cout << "[TCC] CBIT Worker start (Thread ID: " << cbitThread->get_id() << ")" << std::endl;
+    }
 }
 
 /**
@@ -35,6 +41,13 @@ TurretControl::~TurretControl()
         serverThread->join();
         std::cout << "[TCC] Client stop (Thread ID: " << serverThread->get_id() << ")" << std::endl;
         serverThread = nullptr;
+    }
+
+    if (cbitThread)
+    {
+        cbitThread->join();
+        std::cout << "[TCC] CBIT Worker stop (Thread ID: " << cbitThread->get_id() << ")" << std::endl;
+        cbitThread = nullptr;
     }
 }
 
@@ -383,7 +396,7 @@ void TurretControl::sendAckMessage(const DeviceClient& client, uint8_t destId, u
 
     ProtocolDataUnit ack_payload(ack_header);
     AckPayloadData dto(code, ack_info);
-    ack_payload.set_data(&dto, sizeof(dto));
+    ack_payload.set_data(sizeof(dto), &dto);
 
     sendPacket(client, ack_payload);
 }
@@ -402,4 +415,24 @@ void TurretControl::handleAckData(const Message& msg)
     }
 
     msgList.erase(itr);
+}
+
+void TurretControl::cbitWorker()
+{
+    auto now = std::chrono::steady_clock::now();
+
+    while (running)
+    {
+        now = std::chrono::steady_clock::now();
+
+        for (const auto& device : deviceList)
+        {
+            if (device->isConnected() && device->getCBitPeriod() > 0)
+            {
+                device->CBIT_RESULT_REF();
+            }
+        }
+
+        std::this_thread::sleep_until(now + std::chrono::milliseconds(100));
+    }
 }

@@ -13,6 +13,8 @@
 #include <string>
 #include <sys/time.h>
 
+#include "./Logger.h"
+
 // Using declarations
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
@@ -86,19 +88,11 @@ struct MessageHeader
     MessageHeader() = default;
 
     MessageHeader(uint32_t _timestamp, uint8_t _sid, uint8_t _did,
-                  uint8_t _code, uint8_t _ack, uint8_t _priority,
-                  uint8_t _count, uint8_t _len)
+        uint8_t _code, uint8_t _ack, uint8_t _priority,
+        uint8_t _count, uint8_t _len)
         : timestamp(_timestamp), sourceId(_sid), destId(_did), code(_code), ack(_ack),
-          priority(_priority), sendCount(_count), dataLength(_len) {}
-
-    /*
-    bool operator<(const MessageHeader& other) const
-    {
-        if (msg_id != other.msg_id)
-            return msg_id < other.msg_id;
-        return timestamp < other.timestamp;
+        priority(_priority), sendCount(_count), dataLength(_len) {
     }
-    */
 
     /**
      * @brief 페이로드 메시지 여부 (ACK이 아니거나 ACK 요청인 경우)
@@ -118,11 +112,7 @@ struct MessageHeader
 
     void setTimestamp()
     {
-        auto millisec_since_epoch = duration_cast<milliseconds>(
-                                        system_clock::now().time_since_epoch())
-                                        .count();
-
-        timestamp = static_cast<uint32_t>(millisec_since_epoch & TIMESTAMP_MASK);
+        timestamp = Timer::getInstance().getCurrentTimestamp();
     }
 
     void print()
@@ -137,7 +127,7 @@ struct MessageHeader
 struct ProtocolDataUnit
 {
     MessageHeader header;
-    uint8_t *data;
+    uint8_t* data;
     uint16_t checksum;
 
     ProtocolDataUnit() : data(nullptr), checksum(0) {}
@@ -153,7 +143,7 @@ struct ProtocolDataUnit
         freeMemory();
     }
 
-    ProtocolDataUnit(const ProtocolDataUnit &other)
+    ProtocolDataUnit(const ProtocolDataUnit& other)
         : header(other.header), data(nullptr), checksum(other.checksum)
     {
         if (other.data != nullptr)
@@ -163,7 +153,14 @@ struct ProtocolDataUnit
         }
     }
 
-    ProtocolDataUnit &operator=(const ProtocolDataUnit &other)
+    ProtocolDataUnit(ProtocolDataUnit&& other) noexcept
+        : header(other.header), data(other.data), checksum(other.checksum)
+    {
+        other.data = nullptr;
+        other.header.dataLength = 0;
+    }
+
+    ProtocolDataUnit& operator=(const ProtocolDataUnit& other)
     {
         if (this != &other)
         {
@@ -198,31 +195,47 @@ struct ProtocolDataUnit
 
     void print() const
     {
-        std::cout << "\n-------------------- ProtocolDataUnit log --------------------\n"
-                  << "timestamp: " << std::setw(9) << std::setfill('0') << header.timestamp
-                  << "\tmsg id: 0x" << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(header.sourceId)
-                  << std::setw(2) << std::setfill('0') << static_cast<int>(header.destId)
-                  << std::setw(2) << std::setfill('0') << static_cast<int>(header.code)
-                  << std::setw(2) << std::setfill('0') << static_cast<int>(header.ack) << std::dec
-                  << "\tpriority: " << static_cast<int>(header.priority) << std::endl
-                  << "send count: " << static_cast<int>(header.sendCount)
-                  << "\t\tdata length: " << static_cast<int>(header.dataLength)
-                  << "\t\tchecksum: 0x" << std::hex << checksum << std::dec << std::endl;
+        std::ostringstream oss;
+
+        oss << "Header: 0x"
+            << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(header.sourceId)
+            << std::setw(2) << std::setfill('0') << static_cast<int>(header.destId)
+            << std::setw(2) << std::setfill('0') << static_cast<int>(header.code)
+            << std::setw(2) << std::setfill('0') << static_cast<int>(header.ack)
+            << std::dec
+            << " | data (" << static_cast<int>(header.dataLength) << "):";
 
         if (header.dataLength > 0 && data != nullptr)
         {
-            std::cout << "data: ";
+            oss << " ";
             for (int i = 0; i < header.dataLength; ++i)
             {
-                std::cout << "0x" << std::hex << static_cast<int>(data[i]) << " " << std::dec;
+                oss << "0x"
+                    << std::uppercase << std::hex
+                    << std::setw(2) << std::setfill('0')
+                    << static_cast<int>(data[i]);
+                if (i != header.dataLength - 1)
+                    oss << " ";
             }
-            std::cout << "\n";
         }
 
-        std::cout << "--------------------------------------------------------------\n";
+        Logger::log("%s", oss.str().c_str());
     }
 
-    void set_data(const void *input, size_t input_size)
+    template<typename T>
+    T getData() const
+    {
+        if (data == nullptr) {
+            throw std::runtime_error("Data pointer is null.");
+        }
+        if (header.dataLength < sizeof(T)) {
+            throw std::runtime_error("Data length is smaller than requested type size.");
+        }
+
+        return *reinterpret_cast<const T*>(data);
+    }
+
+    void set_data(size_t input_size, const void* input)
     {
         if (input_size == 0)
             return;
@@ -236,18 +249,16 @@ struct ProtocolDataUnit
         checksum = calculateChecksum(*this);
     }
 
-    static uint16_t calculateChecksum(const ProtocolDataUnit &pdu)
+    static uint16_t calculateChecksum(const ProtocolDataUnit& pdu)
     {
         uint32_t sum = 0;
 
-        // pdu.header 바이트 단위로 읽기
         const uint8_t* header_bytes = reinterpret_cast<const uint8_t*>(&pdu.header);
         for (size_t i = 0; i < sizeof(MessageHeader); ++i)
         {
             sum += header_bytes[i];
         }
 
-        // pdu.data 바이트 단위로 읽기
         for (size_t i = 0; i < pdu.header.dataLength; ++i)
         {
             sum += pdu.data[i];
@@ -255,15 +266,6 @@ struct ProtocolDataUnit
 
         return static_cast<uint16_t>(sum & 0xFFFF);
     }
-
-    /*
-    bool operator<(const ProtocolDataUnit& other) const
-    {
-        if (header.msg_id == other.header.msg_id)
-            return header.timestamp < other.header.timestamp;
-        return header.msg_id < other.header.msg_id;
-    }
-    */
 };
 #pragma pack(pop)
 
@@ -289,9 +291,11 @@ struct Message
 
     Message() {}
 
+    Message(ProtocolDataUnit _pdu) : pdu(_pdu) {}
+
     Message(DeviceClient _client, ProtocolDataUnit _pdu) : client(_client), pdu(_pdu) {}
 
-    bool operator<(const Message &other) const
+    bool operator<(const Message& other) const
     {
         // priority가 같으면 send_count가 작은 것이 우선
         if (pdu.header.priority == other.pdu.header.priority)
@@ -315,10 +319,11 @@ struct AckPayloadData
     uint16_t info;
 
     AckPayloadData(uint16_t _code, uint16_t _info)
-        : code(_code), info(_info) {}
+        : code(_code), info(_info) {
+    }
 
-    static AckPayloadData decode(const Message &msg)
+    static AckPayloadData decode(const Message& msg)
     {
-        return *reinterpret_cast<const AckPayloadData *>(msg.pdu.data);
+        return *reinterpret_cast<const AckPayloadData*>(msg.pdu.data);
     }
 };

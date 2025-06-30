@@ -5,6 +5,12 @@
 #include "./libraries/tcc/TurretControl.h"
 #include "./libraries/InputHelper.h"
 #include "./devices/attla/AttlaDriver.h"
+#include "./devices/gtcu/GtcuDriver.h"
+#include "./devices/pcu/PcuDriver.h"
+#include "./devices/acu/AcuDriver.h"
+#include "./devices/wcu/WcuDriver.h"
+#include "./devices/tpcu/TpcuDriver.h"
+#include "./devices/mccu/MccuDriver.h"
 
 int main()
 {
@@ -15,7 +21,14 @@ int main()
 
     // TurretControl::getInstance().addDevice(&AttlaDriver::getInstance());
     TurretControl::getInstance().addDevices(
-        &AttlaDriver::getInstance());
+        &AttlaDriver::getInstance(),
+        &GtcuDriver::getInstance(),
+        &PcuDriver::getInstance(),
+        &AcuDriver::getInstance(),
+        &WcuDriver::getInstance(),
+        &TpcuDriver::getInstance(),
+        &MccuDriver::getInstance()
+    );
 
     // CommandLine::start(&tcc, &deviceMapper);
 
@@ -32,7 +45,7 @@ int main()
         stream >> deviceName;
         stream >> funcName;
         */
-        AttlaDriver &attla = AttlaDriver::getInstance();
+        AttlaDriver& attla = AttlaDriver::getInstance();
 
         if (command == "attla encoder reset result")
         {

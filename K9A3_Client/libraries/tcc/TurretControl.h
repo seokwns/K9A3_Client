@@ -41,7 +41,7 @@ private:
     // Member variables
     const uint8_t deviceId;
     const uint16_t port;
-    const DeviceClient tccClient = {DeviceTable::TCC.ip, DeviceTable::TCC.port};
+    const DeviceClient tccClient = { DeviceTable::TCC.ip, DeviceTable::TCC.port };
 
     TccState state;
 
@@ -59,13 +59,14 @@ private:
     std::unique_ptr<ThreadPool> pool;
     std::unique_ptr<std::thread> ackThread;
     std::unique_ptr<std::thread> serverThread;
+    std::unique_ptr<std::thread> cbitThread;
 
     std::vector<std::shared_ptr<DeviceDriver>> deviceList;
 
     // Helper functions
-    DeviceClient createClient(const sockaddr_in &client_addr);
-    std::optional<ProtocolDataUnit> parsePayload(const uint8_t *buffer, size_t recv_len);
-    uint8_t *serializePDU(const ProtocolDataUnit &pdu, size_t total_size);
+    DeviceClient createClient(const sockaddr_in& client_addr);
+    std::optional<ProtocolDataUnit> parsePayload(const uint8_t* buffer, size_t recv_len);
+    uint8_t* serializePDU(const ProtocolDataUnit& pdu, size_t total_size);
 
     /**
      * @brief ACK 수신 여부를 체크 후 재전송하는 스레드 worker
@@ -76,6 +77,8 @@ private:
      * @brief UDP 패킷 수신 스레드 worker
      */
     void EthernetWorker();
+
+    void cbitWorker();
 
 public:
     // Constructor & Destructor
@@ -88,7 +91,7 @@ public:
      * @param _device DeviceDriver를 상속한 장치 클래스
      */
     template <typename T>
-    void addDevice(T *_device);
+    void addDevice(T* _device);
 
     /**
      * @brief 파라미터로 전달받은 모든 장치들을 추가합니다
@@ -143,14 +146,14 @@ public:
     void setEmergencyCtrlState(uint8_t _deviceId, uint16_t result);
 
     // Network and packet handling
-    void sendPacket(const DeviceClient &client, ProtocolDataUnit &pdu);
-    void handlePacketData(const Message &msg);
-    void sendAckMessage(const DeviceClient &client, uint8_t destId, uint8_t code, uint8_t ack_result, uint8_t ack_info);
-    void handleAckData(const Message &msg);
+    void sendPacket(const DeviceClient& client, ProtocolDataUnit& pdu);
+    void handlePacketData(const Message& msg);
+    void sendAckMessage(const DeviceClient& client, uint8_t destId, uint8_t code, uint8_t ack_result, uint8_t ack_info);
+    void handleAckData(const Message& msg);
 };
 
 template <typename T>
-inline void TurretControl::addDevice(T *_device)
+inline void TurretControl::addDevice(T* _device)
 {
     static_assert(std::is_base_of<DeviceDriver, T>::value, "[TCC] Error: T must be derived from device");
     auto dev_ptr = std::shared_ptr<T>(_device);

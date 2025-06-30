@@ -1,65 +1,75 @@
 #include "Logger.h"
 
-void Logger::log(const char *fmt, ...)
+void Logger::log(const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    printLog(false, fmt, args);
+    vprintLog(COLOR_GRAY, fmt, args);
     va_end(args);
 }
 
-void Logger::error(const char *fmt, ...)
+void Logger::debug(const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    printLog(true, fmt, args);
+    vprintLog(COLOR_DEFAULT, fmt, args);
     va_end(args);
 }
 
-void Logger::logMessage(const ProtocolDataUnit &pdu)
+void Logger::info(const char* fmt, ...)
 {
-    std::ostringstream oss;
-
-    oss << "Header: 0x"
-        << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(pdu.header.sourceId)
-        << std::setw(2) << std::setfill('0') << static_cast<int>(pdu.header.destId)
-        << std::setw(2) << std::setfill('0') << static_cast<int>(pdu.header.code)
-        << std::setw(2) << std::setfill('0') << static_cast<int>(pdu.header.ack)
-        << std::dec
-        << " | data (" << static_cast<int>(pdu.header.dataLength) << "):";
-    if (pdu.header.dataLength > 0 && pdu.data != nullptr)
-    {
-        oss << " ";
-        for (int i = 0; i < pdu.header.dataLength; ++i)
-        {
-            oss << "0x"
-                << std::uppercase << std::hex
-                << std::setw(2) << std::setfill('0')
-                << static_cast<int>(pdu.data[i]);
-            if (i != pdu.header.dataLength - 1)
-                oss << " ";
-        }
-    }
-
-    Logger::log("%s", oss.str().c_str());
+    va_list args;
+    va_start(args, fmt);
+    vprintLog(COLOR_GREEN, fmt, args);
+    va_end(args);
 }
 
-void Logger::printLog(bool isError, const char *fmt, va_list args)
+void Logger::warning(const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    vprintLog(COLOR_YELLOW, fmt, args);
+    va_end(args);
+}
+
+void Logger::error(const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    vprintLog(COLOR_RED, fmt, args);
+    va_end(args);
+}
+
+void Logger::vprintLog(const char* color, const char* fmt, va_list args)
 {
     char buf[BUF_SIZE];
-    vsnprintf(buf, BUF_SIZE, fmt, args);
+    int len = vsnprintf(buf, sizeof(buf), fmt, args);
+
+    if (len < 0 || static_cast<size_t>(len) >= sizeof(buf))
+    {
+        buf[sizeof(buf) - 4] = '.';
+        buf[sizeof(buf) - 3] = '.';
+        buf[sizeof(buf) - 2] = '.';
+        buf[sizeof(buf) - 1] = '\0';
+    }
 
     uint32_t time = Timer::getInstance().getCurrentTimestamp();
-    std::ostringstream oss;
-    oss << "[" << std::setw(10) << std::setfill('_') << time / 1000 << "." << std::setw(3) << std::setfill('0') << time % 1000 << "] " << buf;
-    std::string logline = oss.str();
 
-    if (isError)
+    std::ostringstream ossHeader;
+
+    ossHeader << '['
+        << std::setw(10) << std::setfill('_') << time / 1000
+        << '.'
+        << std::setw(3) << std::setfill('0') << time % 1000
+        << "] ";
+
+    std::string header = ossHeader.str();
+    std::istringstream iss(buf);
+    std::string line;
+
+    while (std::getline(iss, line))
     {
-        std::cout << "\033[31m" << logline << "\033[0m" << std::endl;
+        std::cout << color << header << line << COLOR_RESET << std::endl;
     }
-    else
-    {
-        std::cout << logline << std::endl;
-    }
+    std::cout.flush();
 }

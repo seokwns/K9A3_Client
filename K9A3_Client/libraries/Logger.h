@@ -10,20 +10,39 @@
 #include <sstream>
 
 #include "./Timer.h"
-#include "./singleton.h"
-#include "./messages.h"
+
+namespace
+{
+    constexpr const char* COLOR_RED = "\033[31m";
+    constexpr const char* COLOR_RESET = "\033[0m";
+    constexpr const char* COLOR_YELLOW = "\033[33m";
+    constexpr const char* COLOR_GREEN = "\033[32m";
+    constexpr const char* COLOR_BLUE = "\033[34m";
+    constexpr const char* COLOR_GRAY = "\033[90m";
+    constexpr const char* COLOR_DEFAULT = "\033[39m";
+}
+
+enum LogLevel
+{
+    LOG_ALL,
+    LOG_INFO
+};
 
 class Logger : public Singleton<Logger>
 {
 public:
-    void log(const char *fmt, ...);
+    static void log(const char* fmt, ...);
 
-    void logMessage(const ProtocolDataUnit &pdu);
+    static void debug(const char* fmt, ...);
 
-    void error(const char *fmt, ...);
+    static void info(const char* fmt, ...);
+
+    static void warning(const char* fmt, ...);
+
+    static void error(const char* fmt, ...);
 
 private:
     static constexpr size_t BUF_SIZE = 1024;
 
-    void printLog(bool isError, const char *fmt, va_list args);
+    static void vprintLog(const char* color, const char* fmt, va_list args);
 };

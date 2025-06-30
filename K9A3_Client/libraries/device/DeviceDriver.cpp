@@ -40,7 +40,7 @@ ProtocolDataUnit DeviceDriver::createPayload(uint8_t code, uint8_t ack, uint8_t 
 
     pdu.header = header;
 
-    pdu.set_data(data, dataLength);
+    pdu.set_data(dataLength, data);
 
     return pdu;
 }
@@ -112,6 +112,11 @@ void DeviceDriver::PBIT_RESULT_REF()
 
 void DeviceDriver::CBIT_SET_UPD(const Message& msg)
 {
+    if (connected == false)
+    {
+        connected = true;
+    }
+
     uint16_t period = *reinterpret_cast<uint16_t*>(msg.pdu.data);
     cbitPeriod = period;
     Logger::getInstance().log("Device 0x%02X CBIT period set to %d ms.", deviceId, cbitPeriod);
@@ -128,7 +133,6 @@ void DeviceDriver::CBIT_RESULT_REF()
     Timer::wait(50);
     cbit.set({ 0, 0, 0, 0 });
     sendMessage(MessageCode::CBIT_RESULT, AckCode::NO_ACK, cbit.getDataLength(), &cbit.data[0]);
-    Logger::getInstance().log("Device 0x%02X CBIT done.", deviceId);
 }
 
 void DeviceDriver::IBIT_RUN_CMD(const Message& msg)
