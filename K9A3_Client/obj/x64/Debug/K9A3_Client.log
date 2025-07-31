@@ -1,0 +1,12 @@
+﻿  소스의 유효성을 검사하는 중
+  소스를 '192.168.100.101'(으)로 원격으로 복사하는 중
+  아키텍처의 유효성을 검사하는 중
+  아키텍처의 유효성을 검사하는 중
+  원격 빌드를 시작하는 중
+  소스를 컴파일하는 중:
+  TurretControl.cpp
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\libraries\tcc\.\..\device\DeviceDriver.h(96,50): warning : no return statement in function returning non-void [-Wreturn-type]
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\libraries\tcc\.\..\device\DeviceDriver.h(96,50): warning :      virtual DeviceState* getDeviceState() const {}
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\libraries\tcc\.\..\device\DeviceDriver.h(96,50): warning :                                                   ^
+  개체를 연결하는 중
+  K9A3_Client.vcxproj -> C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\bin\x64\Debug\K9A3_Client.out

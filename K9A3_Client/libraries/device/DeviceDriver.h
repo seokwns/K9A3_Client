@@ -55,7 +55,9 @@ public:
     /**
      * @brief 디바이스 초기화 (필요시 오버라이드)
      */
-    virtual void init() {}
+    virtual void init() 
+    {
+    }
 
     /**
      * @brief 디바이스 정보 출력 (필요시 오버라이드)

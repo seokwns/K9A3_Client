@@ -19,7 +19,7 @@ public:
 
     void init() override
     {
-
+        DeviceDriver::init();
     }
 
     void state_info_ref() override;

@@ -1,0 +1,13 @@
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\devices\acu\AcuDriver.cpp;C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\obj\x64\Debug\AcuDriver.o
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\devices\attla\AttlaDriver.cpp;C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\obj\x64\Debug\AttlaDriver.o
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\devices\gtcu\GtcuDriver.cpp;C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\obj\x64\Debug\GtcuDriver.o
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\devices\mccu\MccuDriver.cpp;C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\obj\x64\Debug\MccuDriver.o
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\devices\pcu\PcuDriver.cpp;C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\obj\x64\Debug\PcuDriver.o
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\devices\tpcu\TpcuDriver.cpp;C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\obj\x64\Debug\TpcuDriver.o
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\devices\wcu\WcuDriver.cpp;C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\obj\x64\Debug\WcuDriver.o
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\libraries\cli\CommandLine.cpp;C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\obj\x64\Debug\CommandLine.o
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\libraries\device\DeviceDriver.cpp;C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\obj\x64\Debug\DeviceDriver.o
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\libraries\Logger.cpp;C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\obj\x64\Debug\Logger.o
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\libraries\tcc\TurretControl.cpp;C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\obj\x64\Debug\TurretControl.o
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\libraries\threads\ThreadPool.cpp;C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\obj\x64\Debug\ThreadPool.o
+C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\main.cpp;C:\Users\20190211\Documents\machine\K9A3_Client\K9A3_Client\obj\x64\Debug\main.o

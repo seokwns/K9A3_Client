@@ -30,6 +30,8 @@ int main()
         &MccuDriver::getInstance()
     );
 
+    TurretControl::getInstance().init();
+
     // CommandLine::start(&tcc, &deviceMapper);
 
     while (true)

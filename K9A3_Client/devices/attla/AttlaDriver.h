@@ -24,6 +24,8 @@ public:
         addMessageHandler(0x31, &AttlaDriver::tcc_attla_drive_cmd_cancel_cmd);
         addMessageHandler(0x32, &AttlaDriver::tcc_attla_validation_cmd);
         addMessageHandler(0x40, &AttlaDriver::tcc_attla_drive_cmd);
+
+        DeviceDriver::init();
     }
 
     void tcc_attla_reset_upd(const Message& msg);

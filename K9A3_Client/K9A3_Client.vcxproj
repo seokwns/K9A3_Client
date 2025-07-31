@@ -75,7 +75,13 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
+    <ClCompile Include="devices\acu\AcuDriver.cpp" />
     <ClCompile Include="devices\attla\AttlaDriver.cpp" />
+    <ClCompile Include="devices\gtcu\GtcuDriver.cpp" />
+    <ClCompile Include="devices\mccu\MccuDriver.cpp" />
+    <ClCompile Include="devices\pcu\PcuDriver.cpp" />
+    <ClCompile Include="devices\tpcu\TpcuDriver.cpp" />
+    <ClCompile Include="devices\wcu\WcuDriver.cpp" />
     <ClCompile Include="libraries\cli\CommandLine.cpp" />
     <ClCompile Include="libraries\device\DeviceDriver.cpp" />
     <ClCompile Include="libraries\Logger.cpp" />
@@ -84,9 +90,22 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="devices\acu\AcuDriver.h" />
+    <ClInclude Include="devices\acu\AcuState.h" />
     <ClInclude Include="devices\attla\AttlaDriver.h" />
     <ClInclude Include="devices\attla\AttlaRawData.h" />
     <ClInclude Include="devices\attla\AttlaState.h" />
+    <ClInclude Include="devices\gtcu\GtcuDriver.h" />
+    <ClInclude Include="devices\gtcu\GtcuState.h" />
+    <ClInclude Include="devices\mccu\MccuDriver.h" />
+    <ClInclude Include="devices\mccu\MccuState.h" />
+    <ClInclude Include="devices\pcu\PcuDriver.h" />
+    <ClInclude Include="devices\pcu\PcuDto.h" />
+    <ClInclude Include="devices\pcu\PcuState.h" />
+    <ClInclude Include="devices\tpcu\TpcuDriver.h" />
+    <ClInclude Include="devices\tpcu\TpcuState.h" />
+    <ClInclude Include="devices\wcu\WcuDriver.h" />
+    <ClInclude Include="devices\wcu\WcuState.h" />
     <ClInclude Include="libraries\cli\CommandLine.h" />
     <ClInclude Include="libraries\constants\constants.h" />
     <ClInclude Include="libraries\constants\DeviceConstants.h" />

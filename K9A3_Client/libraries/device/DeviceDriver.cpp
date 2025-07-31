@@ -106,7 +106,7 @@ void DeviceDriver::PBIT_RESULT_REQ(const Message& msg)
 void DeviceDriver::PBIT_RESULT_REF()
 {
     // �׽�Ʈ�� pbit data ����
-    pbit.set({ 0, 0, 0, 0, 0, 1, 0, 1, 2, 0, 0, 0 });
+    pbit.set({ 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0 });
     sendMessage(MessageCode::PBIT_RESULT, AckCode::NO_ACK, pbit.getDataLength(), &pbit.data[0]);
 }
 

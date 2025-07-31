@@ -85,6 +85,8 @@ public:
     TurretControl();
     ~TurretControl();
 
+    void init();
+
     /**
      * @brief 연동 장치 추가
      *
@@ -164,7 +166,7 @@ inline void TurretControl::addDevice(T* _device)
     devices[_device->getDeviceId()] = dev_ptr;
     deviceList.push_back(dev_ptr);
 
-    _device->init();
+    // _device->init();
 }
 
 template <typename... Args>

@@ -5,15 +5,15 @@
  */
 TurretControl::TurretControl() : deviceId(DeviceTable::TCC.deviceId), port(DeviceTable::TCC.port), running(true)
 {
-    if (!ackThread)
-    {
-        ackThread = std::make_unique<std::thread>(&TurretControl::AckWorker, this);
-    }
-
     if (!serverThread)
     {
         serverThread = std::make_unique<std::thread>(&TurretControl::EthernetWorker, this);
         std::cout << "[TCC] Client start (Thread ID: " << serverThread->get_id() << ")" << std::endl;
+    }
+
+    if (!ackThread)
+    {
+        ackThread = std::make_unique<std::thread>(&TurretControl::AckWorker, this);
     }
 
     if (!cbitThread)
@@ -48,6 +48,16 @@ TurretControl::~TurretControl()
         cbitThread->join();
         std::cout << "[TCC] CBIT Worker stop (Thread ID: " << cbitThread->get_id() << ")" << std::endl;
         cbitThread = nullptr;
+    }
+}
+
+void TurretControl::init()
+{
+    Timer::wait(1000);
+
+    for (auto device : deviceList)
+    {
+        device->init();
     }
 }
 
@@ -269,27 +279,11 @@ void TurretControl::handlePacketData(const Message& msg)
 void TurretControl::sendPacket(const DeviceClient& client, ProtocolDataUnit& pdu)
 {
     // pdu.header.setTimestamp();
-    pdu.header.timestamp = 0;
+    // pdu.header.timestamp = 0;
     pdu.setChecksum();
 
-    //const uint8_t* header_bytes = reinterpret_cast<const uint8_t*>(&pdu.header);
-    //for (size_t i = 0; i < sizeof(MessageHeader); ++i)
-    //{
-    //    std::cout << std::hex << std::setw(2) << static_cast<int>(header_bytes[i]) << " ";
-    //}
-
-    //// pdu.data 바이트 단위로 읽기
-    //for (size_t i = 0; i < pdu.header.dataLength; ++i)
-    //{
-    //    std::cout << std::hex << std::setw(2) << static_cast<int>(pdu.data[i]) << " ";
-    //}
-    //std::cout << std::endl;
-    //
-    //Logger::getInstance().log("checksum: 0x%04X", pdu.checksum);
-
-
-    int sock = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sock < 0)
+    int client_sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (client_sock < 0)
     {
         std::cerr << "[Server Thread] Error: Socket creation failed" << std::endl;
         return;
@@ -303,16 +297,17 @@ void TurretControl::sendPacket(const DeviceClient& client, ProtocolDataUnit& pdu
     size_t total_size = HEADER_SIZE + pdu.header.dataLength + CHECKSUM_SIZE;
     uint8_t* serialized_pdu = serializePDU(pdu, total_size);
 
-    ssize_t sent_len = sendto(sock, serialized_pdu, total_size, 0,
+    ssize_t sent_len = sendto(client_sock, serialized_pdu, total_size, 0,
         reinterpret_cast<sockaddr*>(&client_addr), sizeof(client_addr));
 
     if (sent_len < 0)
     {
         std::cerr << "[Server Thread] Error: Message sending failed to " << client.ip << ":" << client.port << std::endl;
+        pdu.print();
     }
 
     delete[] serialized_pdu;
-    close(sock);
+    close(client_sock);
 
     if (pdu.header.ack == AckCode::REQUEST_ACK)
     {
